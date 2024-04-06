@@ -1,7 +1,9 @@
 package br.com.aeroparts.service;
 
-import br.com.aeroparts.entity.Cotacao;
 import br.com.aeroparts.repository.CotacaoRepository;
+import br.com.aeroparts.controller.dto.CotacaoDTO;
+import br.com.aeroparts.entity.Cotacao;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,19 +16,40 @@ public class CotacaoService {
     @Autowired
     private CotacaoRepository cotacaoRepository;
 
-    public Optional<Cotacao> obterCotacaoPorId(Long id) {
-        return cotacaoRepository.findById(id);
-    }
-
-    public List<Cotacao> mostrarCotacoes() {
-        return cotacaoRepository.findAll();
-    }
-
-    public Cotacao salvarCotacao(Cotacao cotacao) {
+    public Cotacao criarCotacao(Cotacao cotacao) {
         return cotacaoRepository.save(cotacao);
     }
 
-    public void deletarCotacao(Long id) {
+    public List<Cotacao> listarCotacoes() {
+        return cotacaoRepository.findAll();
+    }
+
+    public Cotacao encontrarCotacaoPorID(Long id) {
+        return cotacaoRepository.findById(id).
+                orElseThrow(() -> new RuntimeException("Cotação não encontrado com o ID: " + id));
+    }
+
+    @Transactional
+    public Cotacao atualizaCotacao(Long id, Cotacao cotacaoDTO) {
+        Cotacao cotacao = cotacaoRepository.findById(id).orElseThrow(() -> new RuntimeException("Cotação não encontrado com o ID: " + id));
+        cotacao.setData(cotacaoDTO.getData());
+        cotacao.setPreco(cotacaoDTO.getPreco());
+        return cotacao;
+    }
+
+    public void atualizarCotacao(CotacaoDTO cotacaoDTO) {
+        Optional<Cotacao> optionalCotacao = cotacaoRepository.findById(cotacaoDTO.getId());
+        if (optionalCotacao.isPresent()) {
+            Cotacao cotacao = optionalCotacao.get();
+            cotacao.setData(cotacaoDTO.getData());
+            cotacao.setPreco(cotacaoDTO.getPreco());
+            cotacaoRepository.save(cotacao);
+        } else {
+            throw new RuntimeException("Cotação não encontrado com o ID: " + cotacaoDTO.getId());
+        }
+    }
+
+    public void removerCotacao(Long id) {
         cotacaoRepository.deleteById(id);
     }
 }

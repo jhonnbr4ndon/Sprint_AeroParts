@@ -1,13 +1,15 @@
 package br.com.aeroparts.controller;
 
+import br.com.aeroparts.controller.dto.ItemPedidoDTO;
 import br.com.aeroparts.entity.ItemPedido;
 import br.com.aeroparts.service.ItemPedidoService;
+import br.com.aeroparts.service.mapper.ItemPedidoMapper;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/itempedido")
@@ -16,40 +18,33 @@ public class ItemPedidoController {
     @Autowired
     private ItemPedidoService itemPedidoService;
 
+    @GetMapping("/lista")
+    public ResponseEntity<List<ItemPedidoDTO>> listaItemPedido() {
+        List<ItemPedidoDTO> itemPedidoDTO = itemPedidoService.listarItemPedido().stream().map(ItemPedidoMapper::entityDTO).toList();
+        return ResponseEntity.ok(itemPedidoDTO);
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<ItemPedido> obterItemPedidoPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(itemPedidoService.obterItemPedidoPorId(id).orElse(null));
+    public ResponseEntity<ItemPedidoDTO> encontrarItemPedidoPorID(@PathVariable Long id) {
+        ItemPedido itemPedido = itemPedidoService.encontrarItemPedidoPorID(id);
+        return ResponseEntity.ok(ItemPedidoMapper.entityDTO(itemPedido));
     }
 
-    @GetMapping
-    public List<ItemPedido> mostrarItemPedido() {
-        return itemPedidoService.mostrarItemPedido();
-    }
-
-    @PostMapping
-    public ResponseEntity<String> criarItemPedido(@RequestBody ItemPedido itemPedido) {
-        ItemPedido novoItemPedido = itemPedidoService.salvarItemPedido(itemPedido);
-        return ResponseEntity.status(201).body("Item do pedido criado com sucesso. ID do ItemPedido: " + novoItemPedido.getId());
+    @PostMapping("/criar")
+    public ResponseEntity<ItemPedidoDTO> criarNovoItemPedido(@Valid @RequestBody ItemPedidoDTO itemPedidoDTO) {
+        ItemPedido itemPedido = itemPedidoService.criarItemPedido(ItemPedidoMapper.entity(itemPedidoDTO));
+        return ResponseEntity.ok(ItemPedidoMapper.entityDTO(itemPedido));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> atualizarItemPedido(@PathVariable Long id, @RequestBody ItemPedido itemPedidoAtualizado) {
-        Optional<ItemPedido> itemPedidoExistente = itemPedidoService.obterItemPedidoPorId(id);
-
-        if (itemPedidoExistente.isPresent()) {
-            ItemPedido itemPedido = itemPedidoExistente.get();
-            itemPedido.setQuantidade(itemPedidoAtualizado.getQuantidade());
-
-            itemPedidoService.salvarItemPedido(itemPedido);
-            return ResponseEntity.ok("Item do pedido atualizado com sucesso.");
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<ItemPedidoDTO> atualizarItemPedido(@PathVariable Long id, @Valid @RequestBody ItemPedidoDTO itemPedidoDTO) {
+        ItemPedido itemPedido = itemPedidoService.atualizaItemPedido(id, ItemPedidoMapper.entity(itemPedidoDTO));
+        return ResponseEntity.ok(ItemPedidoMapper.entityDTO(itemPedido));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deletarItemPedido(@PathVariable Long id) {
-        itemPedidoService.deletarItemPedido(id);
-        return ResponseEntity.ok("Item do pedido deletado com sucesso.");
+    public ResponseEntity<Void> deletarItemPedido(@PathVariable Long id) {
+        itemPedidoService.removerItemPedido(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,13 +1,15 @@
 package br.com.aeroparts.controller;
 
+import br.com.aeroparts.controller.dto.PedidoDTO;
 import br.com.aeroparts.entity.Pedido;
 import br.com.aeroparts.service.PedidoService;
+import br.com.aeroparts.service.mapper.PedidoMapper;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/pedido")
@@ -16,41 +18,33 @@ public class PedidoController {
     @Autowired
     private PedidoService pedidoService;
 
+    @GetMapping("/lista")
+    public ResponseEntity<List<PedidoDTO>> listaPedidos() {
+        List<PedidoDTO> pedidoDTO = pedidoService.listarPedido().stream().map(PedidoMapper::entityDTO).toList();
+        return ResponseEntity.ok(pedidoDTO);
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<Pedido> obterPedidoPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(pedidoService.obterPedidoPorId(id).orElse(null));
+    public ResponseEntity<PedidoDTO> encontrarPedidoPorID(@PathVariable Long id) {
+        Pedido pedido = pedidoService.encontrarPedidoPorID(id);
+        return ResponseEntity.ok(PedidoMapper.entityDTO(pedido));
     }
 
-    @GetMapping
-    public List<Pedido> mostrarPedido() {
-        return pedidoService.mostrarPedido();
-    }
-
-    @PostMapping
-    public ResponseEntity<String> criarPedido(@RequestBody Pedido pedido) {
-        Pedido novoPedido = pedidoService.salvarPedido(pedido);
-        return ResponseEntity.status(201).body("Pedido criado com sucesso. ID do Pedido: " + novoPedido.getId());
+    @PostMapping("/criar")
+    public ResponseEntity<PedidoDTO> criarNovoPedido(@Valid @RequestBody PedidoDTO pedidoDTO) {
+        Pedido pedido = pedidoService.criarPedido(PedidoMapper.entity(pedidoDTO));
+        return ResponseEntity.ok(PedidoMapper.entityDTO(pedido));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> atualizarPedido(@PathVariable Long id, @RequestBody Pedido pedidoAtualizado) {
-        Optional<Pedido> pedidoExistente = pedidoService.obterPedidoPorId(id);
-
-        if (pedidoExistente.isPresent()) {
-            Pedido pedido = pedidoExistente.get();
-            pedido.setData(pedidoAtualizado.getData());
-            pedido.setStatus(pedidoAtualizado.getStatus());
-
-            pedidoService.salvarPedido(pedido);
-            return ResponseEntity.ok("Pedido atualizado com sucesso.");
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<PedidoDTO> atualizaPedido(@PathVariable Long id, @Valid @RequestBody PedidoDTO pedidoDTO) {
+        Pedido pedido = pedidoService.atualizaPedido(id, PedidoMapper.entity(pedidoDTO));
+        return ResponseEntity.ok(PedidoMapper.entityDTO(pedido));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deletarPedido(@PathVariable Long id) {
-        pedidoService.deletarPedido(id);
-        return ResponseEntity.ok("Pedido deletado com sucesso.");
+    public ResponseEntity<Void> deletarPedido(@PathVariable Long id) {
+        pedidoService.removerPedido(id);
+        return ResponseEntity.noContent().build();
     }
 }
