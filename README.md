@@ -2,7 +2,6 @@
 
 ## Integrantes do Grupo
 - Leonardo Paganini RM96562
-- Matheus Leite RM96893
 - Jhonn Brandon RM97305
 - Regina Pompeo RM97032
 
