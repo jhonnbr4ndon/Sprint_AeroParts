@@ -3,7 +3,7 @@ package br.com.aeroparts.service;
 import br.com.aeroparts.controller.dto.ProdutoDTO;
 import br.com.aeroparts.entity.Produto;
 import br.com.aeroparts.repository.ProdutoRepository;
-import jakarta.transaction.Transactional;
+import br.com.aeroparts.strategies.produto.ProdutoStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +15,19 @@ public class ProdutoService {
 
     @Autowired
     private ProdutoRepository produtoRepository;
+
+    @Autowired
+    private ProdutoStrategy produtoStrategy;
+
+    @Autowired
+    public void setProdutoStrategy(ProdutoStrategy produtoStrategy) {
+        this.produtoStrategy = produtoStrategy;
+    }
+
+    public List<Produto> listaOrganizadaProdutos(ProdutoStrategy strategy) {
+        List<Produto> produtos = produtoRepository.findAll();
+        return strategy.organizar(produtos);
+    }
 
     public Produto criarProduto(Produto produto) {
         return produtoRepository.save(produto);
@@ -29,13 +42,15 @@ public class ProdutoService {
                 orElseThrow(() -> new RuntimeException("Produto não encontrado com o ID: " + id));
     }
 
-    @Transactional
     public Produto atualizaProduto(Long id, Produto produtoDTO) {
-        Produto produto = produtoRepository.findById(id).orElseThrow(() -> new RuntimeException("Produto não encontrado com o ID: " + id));
+        Produto produto = produtoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado com o ID: " + id));
+
         produto.setNome(produtoDTO.getNome());
         produto.setDescricao(produtoDTO.getDescricao());
         produto.setPreco(produtoDTO.getPreco());
-        return produto;
+
+        return produtoRepository.save(produto);
     }
 
     public void atualizarProduto(ProdutoDTO produtoDTO) {

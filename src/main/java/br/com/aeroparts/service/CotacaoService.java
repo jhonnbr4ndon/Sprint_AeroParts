@@ -3,7 +3,7 @@ package br.com.aeroparts.service;
 import br.com.aeroparts.repository.CotacaoRepository;
 import br.com.aeroparts.controller.dto.CotacaoDTO;
 import br.com.aeroparts.entity.Cotacao;
-import jakarta.transaction.Transactional;
+import br.com.aeroparts.strategies.cotacao.CotacaoEstrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +15,19 @@ public class CotacaoService {
 
     @Autowired
     private CotacaoRepository cotacaoRepository;
+
+    @Autowired
+    private CotacaoEstrategy cotacaoEstrategy;
+
+    @Autowired
+    private void setCotacaoEstrategy(CotacaoEstrategy cotacaoEstrategy) {
+        this.cotacaoEstrategy = cotacaoEstrategy;
+    }
+
+    public List<Cotacao> listaOrganizadaCotacao(CotacaoEstrategy strategy) {
+        List<Cotacao> cotacao = cotacaoRepository.findAll();
+        return strategy.organizar(cotacao);
+    }
 
     public Cotacao criarCotacao(Cotacao cotacao) {
         return cotacaoRepository.save(cotacao);
@@ -29,12 +42,14 @@ public class CotacaoService {
                 orElseThrow(() -> new RuntimeException("Cotação não encontrado com o ID: " + id));
     }
 
-    @Transactional
     public Cotacao atualizaCotacao(Long id, Cotacao cotacaoDTO) {
-        Cotacao cotacao = cotacaoRepository.findById(id).orElseThrow(() -> new RuntimeException("Cotação não encontrado com o ID: " + id));
+        Cotacao cotacao = cotacaoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cotação não encontrada com o ID: " + id));
+
         cotacao.setData(cotacaoDTO.getData());
         cotacao.setPreco(cotacaoDTO.getPreco());
-        return cotacao;
+
+        return cotacaoRepository.save(cotacao);
     }
 
     public void atualizarCotacao(CotacaoDTO cotacaoDTO) {

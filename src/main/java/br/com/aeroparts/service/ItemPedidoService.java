@@ -3,7 +3,6 @@ package br.com.aeroparts.service;
 import br.com.aeroparts.repository.ItemPedidoRepository;
 import br.com.aeroparts.controller.dto.ItemPedidoDTO;
 import br.com.aeroparts.entity.ItemPedido;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,11 +28,13 @@ public class ItemPedidoService {
                 orElseThrow(() -> new RuntimeException("ItemPedido não encontrado com o ID: " + id));
     }
 
-    @Transactional
     public ItemPedido atualizaItemPedido(Long id, ItemPedido itemPedidoDTO) {
-        ItemPedido itemPedido = itemPedidoRepository.findById(id).orElseThrow(() -> new RuntimeException("ItemPedido não encontrado com o ID: " + id));
+        ItemPedido itemPedido = itemPedidoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("ItemPedido não encontrado com o ID: " + id));
+
         itemPedido.setQuantidade(itemPedidoDTO.getQuantidade());
-        return itemPedido;
+
+        return itemPedidoRepository.save(itemPedido);
     }
 
     public void atualizarItemPedido(ItemPedidoDTO itemPedidoDTO) {

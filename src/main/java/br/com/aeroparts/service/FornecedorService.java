@@ -3,7 +3,7 @@ package br.com.aeroparts.service;
 import br.com.aeroparts.repository.FornecedorRepository;
 import br.com.aeroparts.controller.dto.FornecedorDTO;
 import br.com.aeroparts.entity.Fornecedor;
-import jakarta.transaction.Transactional;
+import br.com.aeroparts.strategies.fornecedor.FornecedorStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +15,19 @@ public class FornecedorService {
 
     @Autowired
     private FornecedorRepository fornecedorRepository;
+
+    @Autowired
+    private FornecedorStrategy fornecedorStrategy;
+
+    @Autowired
+    private void setFornecedorStrategy(FornecedorStrategy fornecedorStrategy) {
+        this.fornecedorStrategy = fornecedorStrategy;
+    }
+
+    public List<Fornecedor> listaOrganizadaForenecedor(FornecedorStrategy strategy) {
+        List<Fornecedor> fornecedors = fornecedorRepository.findAll();
+        return strategy.organizar(fornecedors);
+    }
 
     public Fornecedor criarFornecedor(Fornecedor fornecedor) {
         return fornecedorRepository.save(fornecedor);
@@ -28,13 +41,16 @@ public class FornecedorService {
         return fornecedorRepository.findById(id).
                 orElseThrow(() -> new RuntimeException("Fornecedor não encontrado com o ID: " + id));
     }
-    @Transactional
+
     public Fornecedor atualizaFornecedor(Long id, Fornecedor fornecedorDTO) {
-        Fornecedor fornecedor = fornecedorRepository.findById(id).orElseThrow(() -> new RuntimeException("Fornecedor não encontrado com o ID: " + id) );
+        Fornecedor fornecedor = fornecedorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Fornecedor não encontrado com o ID: " + id));
+
         fornecedor.setNome(fornecedorDTO.getNome());
         fornecedor.setEndereco(fornecedorDTO.getEndereco());
         fornecedor.setContato(fornecedorDTO.getContato());
-        return fornecedor;
+
+        return fornecedorRepository.save(fornecedor);
     }
 
     public void atualizarFornecedor(FornecedorDTO fornecedorDTO) {

@@ -1,7 +1,8 @@
 package br.com.aeroparts.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+
+import javax.persistence.*;
 
 @Entity
 @Table(name = "itemPedido")

@@ -3,7 +3,7 @@ package br.com.aeroparts.service;
 import br.com.aeroparts.controller.dto.PedidoDTO;
 import br.com.aeroparts.entity.Pedido;
 import br.com.aeroparts.repository.PedidoRepository;
-import jakarta.transaction.Transactional;
+import br.com.aeroparts.strategies.pedido.PedidoStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +15,19 @@ public class PedidoService {
 
     @Autowired
     private PedidoRepository pedidoRepository;
+
+    @Autowired
+    private PedidoStrategy pedidoStrategy;
+
+    @Autowired
+    public void setPedidoStrategy(PedidoStrategy pedidoStrategy) {
+        this.pedidoStrategy = pedidoStrategy;
+    }
+
+    public List<Pedido> listaOrganizadaPedido(PedidoStrategy strategy) {
+        List<Pedido> pedidos = pedidoRepository.findAll();
+        return strategy.organizar(pedidos);
+    }
 
     public Pedido criarPedido(Pedido pedido) {
         return pedidoRepository.save(pedido);
@@ -29,12 +42,14 @@ public class PedidoService {
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado com o ID: " + id));
     }
 
-    @Transactional
     public Pedido atualizaPedido(Long id, Pedido pedidoDTO) {
-        Pedido pedido = pedidoRepository.findById(id).orElseThrow(() -> new RuntimeException("Pedido não encontrado com o ID: " + id));
+        Pedido pedido = pedidoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pedido não encontrado com o ID: " + id));
+
         pedido.setData(pedidoDTO.getData());
         pedido.setStatus(pedidoDTO.getStatus());
-        return pedido;
+
+        return pedidoRepository.save(pedido);
     }
 
     public void atualizarPedidos(PedidoDTO pedidoDTO) {

@@ -4,7 +4,6 @@ import br.com.aeroparts.controller.dto.ItemPedidoDTO;
 import br.com.aeroparts.entity.ItemPedido;
 import br.com.aeroparts.service.ItemPedidoService;
 import br.com.aeroparts.service.mapper.ItemPedidoMapper;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,15 +30,15 @@ public class ItemPedidoController {
     }
 
     @PostMapping("/criar")
-    public ResponseEntity<ItemPedidoDTO> criarNovoItemPedido(@Valid @RequestBody ItemPedidoDTO itemPedidoDTO) {
+    public ResponseEntity<ItemPedidoDTO> criarNovoItemPedido( @RequestBody ItemPedidoDTO itemPedidoDTO) {
         ItemPedido itemPedido = itemPedidoService.criarItemPedido(ItemPedidoMapper.entity(itemPedidoDTO));
         return ResponseEntity.ok(ItemPedidoMapper.entityDTO(itemPedido));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ItemPedidoDTO> atualizarItemPedido(@PathVariable Long id, @Valid @RequestBody ItemPedidoDTO itemPedidoDTO) {
-        ItemPedido itemPedido = itemPedidoService.atualizaItemPedido(id, ItemPedidoMapper.entity(itemPedidoDTO));
-        return ResponseEntity.ok(ItemPedidoMapper.entityDTO(itemPedido));
+    public ResponseEntity<ItemPedidoDTO> atualizarItemPedido(@PathVariable Long id, @RequestBody ItemPedidoDTO itemPedidoDTO) {
+        ItemPedido itemPedidoAtualizado = itemPedidoService.atualizaItemPedido(id, ItemPedidoMapper.entity(itemPedidoDTO));
+        return ResponseEntity.ok(ItemPedidoMapper.entityDTO(itemPedidoAtualizado));
     }
 
     @DeleteMapping("/{id}")

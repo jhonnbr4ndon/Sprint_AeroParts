@@ -1,7 +1,7 @@
 package br.com.aeroparts.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import javax.persistence.*;
 
 import java.sql.Date;
 import java.util.List;

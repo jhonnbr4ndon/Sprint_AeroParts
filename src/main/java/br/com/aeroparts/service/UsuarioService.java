@@ -3,7 +3,7 @@ package br.com.aeroparts.service;
 import br.com.aeroparts.controller.dto.UsuarioDTO;
 import br.com.aeroparts.repository.UsuarioRepository;
 import br.com.aeroparts.entity.Usuario;
-import jakarta.transaction.Transactional;
+import br.com.aeroparts.strategies.usuario.UsuarioStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +15,19 @@ public class UsuarioService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private UsuarioStrategy usuarioStrategies;
+
+    @Autowired
+    public void setUsuarioStrategy(UsuarioStrategy usuarioStrategy) {
+        this.usuarioStrategies = usuarioStrategy;
+    }
+
+    public List<Usuario> listaOrganizadaUsuarios(UsuarioStrategy strategy) {
+        List<Usuario> usuarios = usuarioRepository.findAll();
+        return strategy.organizar(usuarios);
+    }
 
     public Usuario criarUsuario(Usuario usuario) {
         return usuarioRepository.save(usuario);
@@ -29,13 +42,15 @@ public class UsuarioService {
                 orElseThrow(() -> new RuntimeException("Usuário não encontrado com o ID: " + id));
     }
 
-    @Transactional
     public Usuario atualizaUsuario(Long id, Usuario usuarioDTO) {
-        Usuario usuario = usuarioRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuário não encontrado com o ID: " + id));
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o ID: " + id));
+
         usuario.setNome(usuarioDTO.getNome());
         usuario.setEmail(usuarioDTO.getEmail());
         usuario.setSenha(usuarioDTO.getSenha());
-        return usuario;
+
+        return usuarioRepository.save(usuario);
     }
 
     public void atualizarUsuario(UsuarioDTO usuarioDTO) {
