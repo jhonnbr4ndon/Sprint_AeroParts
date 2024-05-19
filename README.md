@@ -2,7 +2,6 @@
 
 ## Integrantes do Grupo
 - Leonardo Paganini RM96562
-- Matheus Leite RM96893
 - Jhonn Brandon RM97305
 - Regina Pompeo RM97032
 
@@ -16,6 +15,10 @@ gerenciamento de fornecedores, pedidos e produtos. A automação desse processo
 proporciona maior eficiência, reduzindo o tempo necessário para obter cotações competitivas 
 e facilitando o controle e a análise dos dados de aquisição.
 
+## Vídeo com a apresentação da aplicação funcionando
+```
+https://youtu.be/3VqFrZn0DXc
+```
 ## Instruções para Rodar a Aplicação
 Passo 1: Certifique-se de que você já possui o IntelliJ IDEA instalado e configurado no seu computador. Caso não tenha, você pode baixá-lo no site oficial da JetBrains.
 
